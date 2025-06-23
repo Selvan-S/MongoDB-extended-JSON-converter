@@ -8,22 +8,28 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
-      <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-database"></i>
+        </div>
         <h1>MongoDB Extended JSON Converter</h1>
+      </div>
+
+      <header>
         <p>
-          Easily convert MongoDB Extended JSON (EJSON) to standard JSON format.
-          Paste your EJSON in the input area and get human-readable JSON
-          instantly.
+          Convert MongoDB Extended JSON (EJSON) to standard JSON format. Handles
+          complex nested structures, dates, ObjectIds, and all MongoDB-specific
+          types.
         </p>
       </header>
 
-      <div class="converter-card">
+      <div class="card">
         <div class="card-header">
-          <h2>JSON Converter Tool</h2>
+          <h2><i class="fas fa-exchange-alt"></i> JSON Conversion Tool</h2>
           <div>
             <span class="badge badge-info">MongoDB EJSON</span>
             <i class="fas fa-arrow-right"></i>
@@ -47,6 +53,21 @@ Example:
   "count": { "$numberInt": "100" }
 }'
             ></textarea>
+
+            <div class="stats">
+              <div class="stat-item">
+                <div class="stat-label">Characters</div>
+                <div class="stat-value" id="inputCharCount">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Lines</div>
+                <div class="stat-value" id="inputLineCount">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Depth</div>
+                <div class="stat-value" id="inputDepth">0</div>
+              </div>
+            </div>
           </div>
 
           <div class="output-section">
@@ -59,6 +80,21 @@ Example:
               placeholder="Your converted JSON will appear here..."
               readonly
             ></textarea>
+
+            <div class="stats">
+              <div class="stat-item">
+                <div class="stat-label">Characters</div>
+                <div class="stat-value" id="outputCharCount">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Lines</div>
+                <div class="stat-value" id="outputLineCount">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Processing</div>
+                <div class="stat-value" id="processingTime">0ms</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -69,70 +105,75 @@ Example:
           <button id="copyBtn" class="btn btn-success">
             <i class="fas fa-copy"></i> Copy to Clipboard
           </button>
-          <button id="clearBtn" class="btn btn-secondary">
+          <button id="formatBtn" class="btn btn-warning">
+            <i class="fas fa-indent"></i> Format Output
+          </button>
+          <button id="clearBtn" class="btn btn-danger">
             <i class="fas fa-broom"></i> Clear All
           </button>
         </div>
       </div>
 
-      <div class="examples">
-        <h3><i class="fas fa-lightbulb"></i> Example MongoDB Extended JSON</h3>
-        <p>Click on any example to load it into the input area</p>
+      <div class="conversion-info">
+        <h3>
+          <i class="fas fa-info-circle"></i> Supported MongoDB Extended JSON
+          Types
+        </h3>
+        <p>
+          The converter handles all MongoDB-specific types including complex
+          nested structures
+        </p>
         <div class="divider"></div>
 
-        <div class="example-container">
-          <div class="example" onclick="loadExample(1)">
-            <h4><i class="fas fa-id-card"></i> ObjectId Example</h4>
-            <pre>
-{
-  "_id": { "$oid": "5f9d9b3d8c7a6b2a1c8e9f0d" },
-  "name": "John Doe",
-  "age": { "$numberInt": "30" }
-}</pre
-            >
+        <div class="info-grid">
+          <div class="info-card">
+            <h4><i class="fas fa-hashtag"></i> Numeric Types</h4>
+            <ul>
+              <li><span class="type-conversion">$numberInt</span> → Number</li>
+              <li>
+                <span class="type-conversion">$numberLong</span> → Number
+              </li>
+              <li>
+                <span class="type-conversion">$numberDouble</span> → Number
+              </li>
+              <li>
+                <span class="type-conversion">$numberDecimal</span> → Number
+              </li>
+            </ul>
           </div>
 
-          <div class="example" onclick="loadExample(2)">
-            <h4><i class="fas fa-calendar-day"></i> Date Example</h4>
-            <pre>
-{
-  "event": "Conference",
-  "date": { "$date": "2023-12-15T09:00:00Z" },
-  "attendees": { "$numberInt": "250" }
-}</pre
-            >
+          <div class="info-card">
+            <h4><i class="fas fa-calendar"></i> Date & Time</h4>
+            <ul>
+              <li>
+                <span class="type-conversion">$date</span> → ISO 8601 String
+              </li>
+              <li>Supports both string and numeric formats</li>
+              <li>Handles negative timestamps (pre-1970)</li>
+            </ul>
           </div>
 
-          <div class="example" onclick="loadExample(3)">
-            <h4><i class="fas fa-calculator"></i> Number Types Example</h4>
-            <pre>
-{
-  "product": "Laptop",
-  "price": { "$numberDecimal": "1299.99" },
-  "quantity": { "$numberInt": "15" },
-  "total": { "$numberLong": "1949985" }
-}</pre
-            >
+          <div class="info-card">
+            <h4><i class="fas fa-id-card"></i> Identifiers</h4>
+            <ul>
+              <li><span class="type-conversion">$oid</span> → String</li>
+              <li>
+                <span class="type-conversion">$binary</span> → Base64 String
+              </li>
+              <li><span class="type-conversion">$uuid</span> → String</li>
+            </ul>
           </div>
 
-          <div class="example" onclick="loadExample(4)">
-            <h4><i class="fas fa-layer-group"></i> Complex Example</h4>
-            <pre>
-{
-  "_id": { "$oid": "621f3d3a8c7a6b2a1c8e9f1a" },
-  "name": "Alice",
-  "createdAt": { "$date": "2023-06-23T08:30:00Z" },
-  "scores": [
-    { "$numberInt": "95" },
-    { "$numberInt": "88" },
-    { "$numberInt": "92" }
-  ],
-  "metadata": {
-    "isActive": true,
-    "lastLogin": { "$date": "2023-06-22T18:45:23Z" }
-  }
-}</pre
-            >
+          <div class="info-card">
+            <h4><i class="fas fa-cogs"></i> Special Types</h4>
+            <ul>
+              <li><span class="type-conversion">$minKey</span> → "MinKey"</li>
+              <li><span class="type-conversion">$maxKey</span> → "MaxKey"</li>
+              <li><span class="type-conversion">$undefined</span> → null</li>
+              <li>
+                <span class="type-conversion">$regex</span> → RegExp object
+              </li>
+            </ul>
           </div>
         </div>
       </div>
